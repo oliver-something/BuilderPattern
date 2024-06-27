@@ -1,0 +1,3 @@
+/Users/oliver/CLionProjects/Practice/BuilderPattern/cmake-build-debug/CMakeFiles/BuilderPattern.dir
+/Users/oliver/CLionProjects/Practice/BuilderPattern/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/oliver/CLionProjects/Practice/BuilderPattern/cmake-build-debug/CMakeFiles/rebuild_cache.dir
