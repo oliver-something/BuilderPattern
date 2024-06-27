@@ -51,19 +51,64 @@ public:
     }
 };
 
+class Director {
+private:
+    int age_;
+    std::string first_name_;
+    std::string last_name_;
+public:
+    explicit Director(int age, std::string_view firstName, std::string_view lastname):age_(age), first_name_(firstName), last_name_(lastname) {}
+    [[nodiscard]] std::string ToString() const {
+        return std::format("first name: {}, last name : {}, age : {}\n", this->first_name_, this->last_name_, this->age_);
+    }
+};
+
+class DirectorBuilder {
+private:
+    int age_{};
+    std::string first_name_;
+    std::string last_name_;
+
+private:
+    DirectorBuilder() = default;
+public:
+    static DirectorBuilder Builder() {
+        return {};
+    }
+
+    DirectorBuilder WithFirstName(std::string_view firstName) {
+        this->first_name_ = firstName;
+        return *this;
+    }
+
+    DirectorBuilder WithLastName(std::string_view lastName) {
+        this->last_name_ = lastName;
+        return *this;
+    }
+
+    DirectorBuilder BornIn(int age) {
+        this->age_ = age;
+        return *this;
+    }
+
+    Director Build() {
+        return Director(age_, first_name_, last_name_);
+    }
+};
+
 class Movie {
 private:
     std::string title_;
-    std::string director_;
     int release_year_;
     std::vector<Actor> actors_;
+    std::vector<Director> directors_;
 public:
-    explicit Movie(std::string_view title, std::string_view director, int releaseYear, std::vector<Actor> actors) : title_(title),
-                                                                                                                    director_(director),
+    explicit Movie(std::string_view title, std::vector<Director> directors, int releaseYear, std::vector<Actor> actors) : title_(title),
+                                                                                                                    directors_(std::move(directors)),
                                                                                                                     actors_(std::move(actors)),
                                                                                                                     release_year_(releaseYear) {}
     [[nodiscard]] std::string ToString() const {
-        return std::format("Title: {}, Director: {}, Release Date: {}\n", this->title_, this->director_, this->release_year_);
+        return std::format("Title: {}, Release Date: {}\n", this->title_, this->release_year_);
     }
 
     void Casts() {
@@ -71,17 +116,23 @@ public:
             std::cout << actor.ToString();
         }
     }
+
+    void Directors() {
+        for (auto & director: directors_)
+            std::cout << director.ToString();
+    }
 };
 
 class MovieBuilder {
 private:
     std::string title_;
-    std::string director_;
+    std::vector<Director> directors_;
     int release_year_{};
     std::vector<Actor> actors_;
 private:
     MovieBuilder() {
         actors_ = std::vector<Actor>();
+        directors_ = std::vector<Director>();
     };
 public:
     static MovieBuilder Builder() {
@@ -93,18 +144,15 @@ public:
         return *this;
     }
 
-    MovieBuilder WithDirector(std::string_view director) {
-        this->director_ = director;
+    MovieBuilder WithDirector(const std::function<DirectorBuilder(DirectorBuilder)> & action) {
+        auto directorBuilder = DirectorBuilder::Builder();
+        auto director = action(directorBuilder).Build();
+        directors_.push_back(director);
         return *this;
     }
 
     MovieBuilder ReleasedOn(int release_year) {
         this->release_year_ = release_year;
-        return *this;
-    }
-
-    MovieBuilder WithActor(const Actor & actor) {
-        this->actors_.push_back(actor);
         return *this;
     }
 
@@ -115,28 +163,26 @@ public:
         return *this;
     }
 
-
     Movie Build() {
-        return Movie(title_, director_, release_year_, actors_);
+        return Movie(title_, directors_, release_year_, actors_);
     }
 };
 
 int main() {
     auto movie = MovieBuilder::Builder()
                          .WithTitle("Inception")
-                         .WithDirector("Christofer Nolan")
                          .ReleasedOn(2010)
-                         .WithActor(ActorBuilder::Builder()
-                                            .WithFirstName("Leonardo")
-                                            .WithLastName("DiCaprio")
-                                            .BornIn(1996).Build())
+                         .WithDirector([](DirectorBuilder directorBuilder) {
+                             return directorBuilder.WithFirstName("Christofer").WithLastName("Nolan").BornIn(1960);
+                         })
                          .WithActor([](ActorBuilder actorBuilder) {
                              return actorBuilder.WithFirstName("Oliver").WithLastName("Something").BornIn(1998);
                          })
                          .Build();
 
     std::cout << movie.ToString();
-    std::cout << "-------------\n";
+    std::cout << "Actors-------------\n";
     movie.Casts();
-
+    std::cout << "Directors_____________\n";
+    movie.Directors();
 }
