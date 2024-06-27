@@ -31,17 +31,17 @@ public:
         return {};
     }
 
-    ActorBuilder WithFirstName(std::string_view firstName) {
+    ActorBuilder& WithFirstName(std::string_view firstName) {
         this->first_name_ = firstName;
         return *this;
     }
 
-    ActorBuilder WithLastName(std::string_view lastName) {
+    ActorBuilder& WithLastName(std::string_view lastName) {
         this->last_name_ = lastName;
         return *this;
     }
 
-    ActorBuilder BornIn(int age) {
+    ActorBuilder& BornIn(int age) {
         this->age_ = age;
         return *this;
     }
@@ -76,17 +76,17 @@ public:
         return {};
     }
 
-    DirectorBuilder WithFirstName(std::string_view firstName) {
+    DirectorBuilder& WithFirstName(std::string_view firstName) {
         this->first_name_ = firstName;
         return *this;
     }
 
-    DirectorBuilder WithLastName(std::string_view lastName) {
+    DirectorBuilder& WithLastName(std::string_view lastName) {
         this->last_name_ = lastName;
         return *this;
     }
 
-    DirectorBuilder BornIn(int age) {
+    DirectorBuilder& BornIn(int age) {
         this->age_ = age;
         return *this;
     }
@@ -139,19 +139,19 @@ public:
         return {};
     }
 
-    MovieBuilder WithTitle(std::string_view title) {
+    MovieBuilder& WithTitle(std::string_view title) {
         this->title_ = title;
         return *this;
     }
 
-    MovieBuilder WithDirector(const std::function<DirectorBuilder(DirectorBuilder)> & action) {
+    MovieBuilder& WithDirector(const std::function<DirectorBuilder(DirectorBuilder)> & action) {
         auto directorBuilder = DirectorBuilder::Builder();
         auto director = action(directorBuilder).Build();
         directors_.push_back(director);
         return *this;
     }
 
-    MovieBuilder ReleasedOn(int release_year) {
+    MovieBuilder& ReleasedOn(int release_year) {
         this->release_year_ = release_year;
         return *this;
     }
